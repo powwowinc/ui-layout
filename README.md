@@ -1,3 +1,8 @@
+# Branched by Powwow Mobile Inc.
+
+It seems like the original repo is no longer maintained, this contains a bug fix for cases where
+the mouse is no longer clicked, but the splitter bar moves.
+
 # UI.Layout directive [![Build Status](https://travis-ci.org/angular-ui/ui-layout.svg)](https://travis-ci.org/angular-ui/ui-layout)
 
 This directive allows you to split stuff !

@@ -835,7 +835,12 @@ angular.module('ui.layout', [])
           e.stopPropagation();
 
           htmlElement.on('mousemove touchmove', function(event) {
-            scope.$apply(angular.bind(ctrl, ctrl.mouseMoveHandler, event));
+            if(event.buttons == 0) {
+              scope.$apply(angular.bind(ctrl, ctrl.mouseUpHandler, event));
+              htmlElement.off('mousemove touchmove');
+            } else {
+              scope.$apply(angular.bind(ctrl, ctrl.mouseMoveHandler, event));
+            }
           });
           return false;
         });
