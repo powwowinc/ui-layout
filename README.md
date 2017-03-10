@@ -3,6 +3,8 @@
 It seems like the original repo is no longer maintained, this contains a bug fix for cases where
 the mouse is no longer clicked, but the splitter bar moves.
 
+Also, added `ui.layout.startresize` and  `ui.layout.endresize` events for handling start and end dragging of layout, during resizing.
+
 # UI.Layout directive [![Build Status](https://travis-ci.org/angular-ui/ui-layout.svg)](https://travis-ci.org/angular-ui/ui-layout)
 
 This directive allows you to split stuff !
