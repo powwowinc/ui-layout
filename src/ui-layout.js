@@ -168,7 +168,13 @@ angular.module('ui.layout', [])
       if(ctrl.movingSplitbar !== null) {
         ctrl.movingSplitbar = null;
       }
+
+      $scope.$parent.$broadcast('ui.layout.endresize', event);
       return event;
+    };
+
+    ctrl.mouseDownHandler = function(event) {
+      $scope.$parent.$broadcast('ui.layout.startresize', event)
     };
 
     ctrl.mouseMoveHandler = function(mouseEvent) {
@@ -830,6 +836,8 @@ angular.module('ui.layout', [])
         element.on('mousedown touchstart', function(e) {
           ctrl.movingSplitbar = scope.splitbar;
           ctrl.processSplitbar(scope.splitbar);
+
+          scope.$apply(angular.bind(ctrl, ctrl.mouseDownHandler, event));
 
           e.preventDefault();
           e.stopPropagation();
