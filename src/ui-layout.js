@@ -850,12 +850,13 @@ angular.module('ui.layout', [])
               scope.$apply(angular.bind(ctrl, ctrl.mouseMoveHandler, event));
             }
           });
-          return false;
-        });
 
-        htmlElement.on('mouseup touchend', function(event) {
-          scope.$apply(angular.bind(ctrl, ctrl.mouseUpHandler, event));
-          htmlElement.off('mousemove touchmove');
+          htmlElement.on('mouseup touchend', function(event) {
+            scope.$apply(angular.bind(ctrl, ctrl.mouseUpHandler, event));
+            htmlElement.off('mousemove touchmove mouseup touchend ');
+          });
+
+          return false;
         });
 
         scope.$watch('splitbar.size', function(newValue) {
