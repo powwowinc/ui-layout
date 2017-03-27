@@ -837,6 +837,8 @@ angular.module('ui.layout', [])
           ctrl.movingSplitbar = scope.splitbar;
           ctrl.processSplitbar(scope.splitbar);
 
+          element[0].classList.add('dragging');
+
           scope.$apply(angular.bind(ctrl, ctrl.mouseDownHandler, event));
 
           e.preventDefault();
@@ -852,6 +854,8 @@ angular.module('ui.layout', [])
           });
 
           htmlElement.on('mouseup touchend', function(event) {
+            element[0].classList.remove('dragging');
+
             scope.$apply(angular.bind(ctrl, ctrl.mouseUpHandler, event));
             htmlElement.off('mousemove touchmove mouseup touchend ');
           });
