@@ -837,14 +837,13 @@ angular.module('ui.layout', [])
           ctrl.movingSplitbar = scope.splitbar;
           ctrl.processSplitbar(scope.splitbar);
 
-          element[0].classList.add('dragging');
-
           scope.$apply(angular.bind(ctrl, ctrl.mouseDownHandler, event));
 
           e.preventDefault();
           e.stopPropagation();
 
           htmlElement.on('mousemove touchmove', function(event) {
+            element[0].classList.add('dragging');
             if(event.buttons == 0) {
               scope.$apply(angular.bind(ctrl, ctrl.mouseUpHandler, event));
               htmlElement.off('mousemove touchmove');
