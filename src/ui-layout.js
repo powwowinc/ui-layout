@@ -83,63 +83,67 @@ angular.module('ui.layout', [])
             var beforeContainer = processedContainers.beforeContainer;
             var afterContainer = processedContainers.afterContainer;
 
-            if (!beforeContainer.collapsed && !afterContainer.collapsed) {
-              // calculate container positons
-              var difference = ctrl.movingSplitbar[position] - lastPos;
-              var newPosition = ctrl.movingSplitbar[position] - difference;
+            // calculate container positons
+            var difference = ctrl.movingSplitbar[position] - lastPos;
+            var newPosition = ctrl.movingSplitbar[position] - difference;
 
-              // Keep the bar in the window (no left/top 100%)
-              newPosition = Math.min(elementSize - dividerSize, newPosition);
+            // Keep the bar in the window (no left/top 100%)
+            newPosition = Math.min(elementSize - dividerSize, newPosition);
 
-              // Keep the bar from going past the previous element min/max values
-              if (angular.isNumber(beforeContainer.beforeMinValue) && newPosition < beforeContainer.beforeMinValue) {
-                newPosition = beforeContainer.beforeMinValue;
-              }
-              if (angular.isNumber(beforeContainer.beforeMaxValue) && newPosition > beforeContainer.beforeMaxValue) {
-                newPosition = beforeContainer.beforeMaxValue;
-              }
-
-              // Keep the bar from going past the next element min/max values
-              if (afterContainer !== null &&
-                angular.isNumber(afterContainer.afterMinValue) &&
-                newPosition > (afterContainer.afterMinValue - dividerSize)) {
-                newPosition = afterContainer.afterMinValue - dividerSize;
-              }
-              if (afterContainer !== null && angular.isNumber(afterContainer.afterMaxValue) &&
-                newPosition < afterContainer.afterMaxValue) {
-                newPosition = afterContainer.afterMaxValue;
-              }
-
-              // resize the before container
-              beforeContainer.size = newPosition - beforeContainer[position];
-              // store the current value to preserve this size during onResize
-              beforeContainer.uncollapsedSize = beforeContainer.size;
-
-              // update after container position
-              var oldAfterContainerPosition = afterContainer[position];
-              afterContainer[position] = newPosition + dividerSize;
-
-              //update after container size if the position has changed
-              if (afterContainer[position] !== oldAfterContainerPosition) {
-                afterContainer.size = (nextSplitbarIndex === null)
-                  ? elementSize - (newPosition + dividerSize)
-                  : (oldAfterContainerPosition + afterContainer.size) - (newPosition + dividerSize);
-                // store the current value to preserve this size during onResize
-                afterContainer.uncollapsedSize = afterContainer.size;
-              }
-
-              // move the splitbar
-              ctrl.movingSplitbar[position] = newPosition;
-
-              // broadcast an event that resize happened (debounced to 50ms)
-              if (debounceEvent) {
-                $timeout.cancel(debounceEvent);
-              }
-              debounceEvent = $timeout(function () {
-                $scope.$broadcast('ui.layout.resize', beforeContainer, afterContainer);
-                debounceEvent = null;
-              }, 50);
+            // Keep the bar from going past the previous element min/max values
+            if (angular.isNumber(beforeContainer.beforeMinValue) && newPosition < beforeContainer.beforeMinValue) {
+              newPosition = beforeContainer.beforeMinValue;
             }
+            if (angular.isNumber(beforeContainer.beforeMaxValue) && newPosition > beforeContainer.beforeMaxValue) {
+              newPosition = beforeContainer.beforeMaxValue;
+            }
+
+            // Keep the bar from going past the next element min/max values
+            if (afterContainer !== null &&
+              angular.isNumber(afterContainer.afterMinValue) &&
+              newPosition > (afterContainer.afterMinValue - dividerSize)
+            ) {
+              newPosition = afterContainer.afterMinValue - dividerSize;
+            }
+            if (afterContainer !== null &&
+              angular.isNumber(afterContainer.afterMaxValue) &&
+              newPosition < afterContainer.afterMaxValue
+            ) {
+              newPosition = afterContainer.afterMaxValue;
+            }
+
+            // resize the before container
+            beforeContainer.size = newPosition - beforeContainer[position];
+            // store the current value to preserve this size during onResize
+            beforeContainer.uncollapsedSize = beforeContainer.size;
+
+            // update after container position
+            var oldAfterContainerPosition = afterContainer[position];
+            afterContainer[position] = newPosition + dividerSize;
+
+            //update after container size if the position has changed
+            if (afterContainer[position] !== oldAfterContainerPosition) {
+              afterContainer.size = (nextSplitbarIndex === null)
+                ? elementSize - (newPosition + dividerSize)
+                : (oldAfterContainerPosition + afterContainer.size) - (newPosition + dividerSize);
+              // store the current value to preserve this size during onResize
+              afterContainer.uncollapsedSize = afterContainer.size;
+            }
+
+            beforeContainer.collapsed = beforeContainer.size === 0;
+            afterContainer.collapsed = afterContainer.size === 0;
+
+            // move the splitbar
+            ctrl.movingSplitbar[position] = newPosition;
+
+            // broadcast an event that resize happened (debounced to 50ms)
+            if (debounceEvent) {
+              $timeout.cancel(debounceEvent);
+            }
+            debounceEvent = $timeout(function () {
+              $scope.$broadcast('ui.layout.resize', beforeContainer, afterContainer);
+              debounceEvent = null;
+            }, 50);
           }
         }
 
@@ -161,7 +165,7 @@ angular.module('ui.layout', [])
       /**
        * Returns the current value for an option
        * @param  option   The option to get the value for
-       * @return * value of the option. Returns null if there was no option set.
+       * @return The value of the option. Returns null if there was no option set.
        */
       function optionValue(option) {
         if (typeof option === 'number' || typeof option === 'string' && option.match(sizePattern)) {
@@ -285,11 +289,17 @@ angular.module('ui.layout', [])
             if (!LayoutContainer.isSplitbar(ctrl.containers[i])) {
 
               c = ctrl.containers[i];
-              opts.sizes[i] = c.isCentral
-                ? 'auto'
-                : c.collapsed
-                  ? (optionValue(c.minSize) || '0px')
-                  : optionValue(c.uncollapsedSize) || 'auto';
+
+              if (c.isCentral) {
+                opts.sizes[i] = 'auto';
+              } else if (c.collapsed) {
+                opts.sizes[i] = optionValue(c.minSize) || '0px';
+              } else if (optionValue(c.uncollapsedSize)) {
+                opts.sizes[i] = c.uncollapsedSize;
+              } else {
+                opts.sizes[i] = c.uncollapsedSize === undefined ? 'auto' : c.maxSize;
+              }
+
               opts.minSizes[i] = optionValue(c.minSize);
               opts.maxSizes[i] = optionValue(c.maxSize);
 
@@ -369,6 +379,8 @@ angular.module('ui.layout', [])
             }
 
             usedSpace += c.size;
+
+            c.collapsed = c.size === 0;
           }
         }
       };
@@ -495,7 +507,7 @@ angular.module('ui.layout', [])
             }
 
           } else {
-            c.size = c.uncollapsedSize;
+            c.size = c.uncollapsedSize || c.maxSize;
 
             if (nextSplitbar) {
               nextSplitbar[ctrl.sizeProperties.flowProperty] += c.uncollapsedSize;
@@ -505,6 +517,7 @@ angular.module('ui.layout', [])
               nextContainer.uncollapsedSize -= c.uncollapsedSize;
             }
           }
+          $scope.$broadcast('ui.layout.resize', c, nextContainer);
         });
         $scope.$broadcast('ui.layout.toggle', c);
         Layout.toggled();
@@ -558,7 +571,7 @@ angular.module('ui.layout', [])
             }
 
           } else {
-            c.size = c.uncollapsedSize;
+            c.size = c.uncollapsedSize || c.maxSize;
 
             // adds additional space so the splitbar moves back to the proper position
             // to offset the additional space added when collapsing
@@ -571,6 +584,7 @@ angular.module('ui.layout', [])
               prevContainer.size -= (c.uncollapsedSize + endDiff);
             }
           }
+          $scope.$broadcast('ui.layout.resize', prevContainer, c);
         });
         $scope.$broadcast('ui.layout.toggle', c);
         Layout.toggled();
