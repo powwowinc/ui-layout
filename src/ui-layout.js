@@ -458,10 +458,10 @@ angular.module('ui.layout', [])
         var splitter = ctrl.containers[index + 1],
           el;
 
-        if (splitter) {
+        if (splitter && index !== ctrl.containers.length - 2) {
           el = splitter.element[0].children[0];
         } else {
-          splitter = ctrl.containers[index - 1];
+          splitter = ctrl.containers[index];
           el = splitter.element[0].children[1];
         }
 
@@ -870,9 +870,9 @@ angular.module('ui.layout', [])
               }
             }
           }
-          scope.$evalAsync(function () {
-            ctrl.calculate();
-          });
+          // scope.$evalAsync(function () {
+          //   ctrl.calculate();
+          // });
         });
 
         element.on('mousedown touchstart', function (e) {
