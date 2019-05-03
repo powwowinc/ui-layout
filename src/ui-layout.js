@@ -295,7 +295,7 @@ angular.module('ui.layout', [])
               } else if (c.collapsed) {
                 opts.sizes[i] = optionValue(c.minSize) || '0px';
               } else if (optionValue(c.uncollapsedSize)) {
-                opts.sizes[i] = c.uncollapsedSize;
+                opts.sizes[i] = parseInt(c.uncollapsedSize) < availableSize ? c.uncollapsedSize : availableSize;
               } else {
                 opts.sizes[i] = c.uncollapsedSize === undefined ? 'auto' : c.maxSize;
               }
